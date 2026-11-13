@@ -1,0 +1,18 @@
+name: Test result (TODO.md step)
+description: Report the result of a hardware test from TODO.md
+labels: ["test-result"]
+body:
+  - type: input
+    id: step
+    attributes: {label: "TODO.md step", placeholder: "4b motor plug swap"}
+    validations: {required: true}
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Outcome
+      options: ["Moved", "Did not move", "Partly / unclear", "Could not perform"]
+    validations: {required: true}
+  - type: textarea
+    id: details
+    attributes: {label: "What you measured or saw", description: "Voltages, ohms, LED states, sounds. Photos welcome."}
+    validations: {required: true}

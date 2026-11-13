@@ -1,0 +1,11 @@
+name: Bug or documentation error
+description: A script misbehaves or a doc is wrong
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes: {label: "What went wrong?", description: "Include the command you ran and the output."}
+    validations: {required: true}
+  - type: input
+    id: env
+    attributes: {label: "Windows / Python version and machine model"}
