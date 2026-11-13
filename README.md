@@ -7,7 +7,7 @@ We decoded the machine's serial protocol, and the head (left-right) and table (Z
 <p align="center"><img src="images/00-rayjet-with-laptop.jpg" width="520" alt="A Trotec Rayjet 50 laser engraver connected by USB to a Windows 11 laptop"></p>
 <p align="center"><em>Our Rayjet 50, driven over USB from a Windows 11 laptop.</em></p>
 
-[![License: MIT + Commons Clause](https://img.shields.io/badge/license-MIT%20%2B%20Commons%20Clause-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Status: research](https://img.shields.io/badge/status-research-orange)
 ![Platform: Windows 11](https://img.shields.io/badge/platform-Windows%2011-blue)
 ![Help wanted](https://img.shields.io/badge/help-wanted-brightgreen)
@@ -15,7 +15,7 @@ We decoded the machine's serial protocol, and the head (left-right) and table (Z
 > **Use at your own risk.** Scripts move real hardware. Keep the laser tube disconnected while testing motion, power off and unplug before touching connectors. No affiliation with Trotec.
 
 ## License
-Free to use, copy, modify and share for any purpose (personal, educational, in your workshop or business), under the MIT license **plus the Commons Clause**: you may **not sell** the software, or a product or service whose value comes mainly from it. Full text in [LICENSE](LICENSE). Because of that restriction this is *source-available*, not "open source" by the OSI definition. The documentation and photos are covered by the same terms.
+MIT: free to use, copy, modify, share and even sell, with the copyright notice kept. Full text in [LICENSE](LICENSE). The documentation and photos are covered by the same terms.
 
 ## Who is this for?
 - **Rayjet / Speedy2 owners** whose original Windows software no longer runs on modern Windows, or who want to script their machine.

@@ -23,4 +23,4 @@ Use the issue templates. Include the model, firmware string from the handshake, 
 Small, focused changes are easiest to review. Describe what you tested and on which machine. Docs changes need no hardware.
 
 ## License of contributions
-By contributing you agree that your contribution is released under the project license (MIT + Commons Clause, see `LICENSE`).
+By contributing you agree that your contribution is released under the project license (MIT, see `LICENSE`).
