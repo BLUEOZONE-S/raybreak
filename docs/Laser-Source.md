@@ -7,7 +7,7 @@ Identified from the laser's own labels. This is the sealed CO2 source inside our
 - Type: RF-excited, sealed CO2 laser, wavelength ~10.6 um (the 10200-10800 nm on the label is the CO2 band).
 - Rated 30 W (the "75 WATTS MAX" sticker is a generic safety-label ceiling for the housing, not this unit's output;
   the v30 model and "tested at 30 V" identify it as the 30 W version). Class 4.
-- (The unit's serial number is recorded privately and kept out of this repo.)
+- The unit's serial number is readable on the label photo below.
 
 ## The connector that looks like "ethernet"
 - The cable is a modular RJ-style connector plugging into the jack labelled "Interface B" on the laser, with three
@@ -51,12 +51,11 @@ Identified from the laser's own labels. This is the sealed CO2 source inside our
 
 The laser sits above and behind the controller rack. The RJ45 cable runs from the laser's interface jack to the
 controller area, the red and black cables are the 30 V supply, and the laser has further connectors below the RJ45.
-A second cable end with a plug hangs loose beside the laser in this photo; what it is has not been checked. (The
-sticker on the laser is blurred in this image.)
+A second cable end with a plug hangs loose beside the laser in this photo; what it is has not been checked.
 
 ![Laser model label](../images/12-laser-model-label.jpg)
 
-Model FSV30SAG, Firestar series v30, tested at 30 V, made October 2014. The serial number is blurred.
+Model FSV30SAG, Firestar series v30, tested at 30 V, made October 2014. The laser's serial number is on this label.
 
 ![Interface B and status LEDs](../images/13-laser-interface-b-leds.jpg)
 
