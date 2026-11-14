@@ -72,3 +72,23 @@ Observations that sharpen the picture:
 Updated avoid list: `C9`, `CD`, `B1`, and `0A` with channel 4 (suspected trigger, trials 13-17 were clean).
 Still untested: trials 19-36 (`0C` channels 1-4, `80`, `8A`, `8C`, `8E`, `90`, `A2`, `44`, `16`, `B8`, and the five value+enable pairs).
 Speed note: a 1 s gap between trials works; each run still costs ~35 s of start-up checks.
+
+---
+
+## Sweep completed, 2026-11-14 17:19-17:22 (owner watching the LASE light)
+- Trials 19-24 (`0C` channels 1-4, `80`, `8A`): no change.
+- Trial 25 (`8C`) first looked like it moved the Z counter; that was the owner moving Z by hand to check activity. Repeated
+  with no manual Z move it changed nothing.
+- Trials 25-36 (`8C`, `8E`, `90`, `A2`, `44`, `16`, `B8`, and the pairs B5+B7, B9+BB, BD+BF, C1+C3, C5+C7): no status,
+  position or parameter changes; both in-session canaries passed.
+
+## Where the command search stands
+| Group | Result |
+|---|---|
+| Tried, harmless | C2 C4 C6 C8 B3 B7 BB BF C3 C7 CB CF 32; 0A ch1-3; 0C ch1-4; 80 8A 8C 8E 90 A2 44 16 B8; B5 B9 BD C1 C5 alone; the five value+enable pairs |
+| Disturb or hang the machine (avoid) | C9, CD, B1, 0A with channel 4 |
+| Laser indicator | **never lit** during any trial (owner); `GP` LASER_POWER stayed 0 |
+
+Conclusion so far: none of the opcodes in the known layout table, sent with a small value, turns the laser on or changes
+what the controller reports about it. Not yet tried: the laser-flagged move variant `9F` after each enable, larger/other
+values, longer enable sequences, and any opcode outside the layout table.
