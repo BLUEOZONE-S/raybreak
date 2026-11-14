@@ -26,16 +26,44 @@ Identified from the laser's own labels. This is the sealed CO2 source inside our
   (a low-duty "tickle" keeps the plasma primed; higher duty = more power) plus a gate/enable and an interlock. The
   controller generates these on the interface cable; there is no packet "handshake" on the control line.
 
-## Is there a protocol we could talk to? (to verify from the Synrad manual)
-- The Firestar series also supports an **RS-232 serial diagnostic/command interface** (ASCII command set) that can
-  report status, case temperature, PWM duty, operating hours, model and faults, and in some modes command lasing.
-  This is a real request/reply protocol - the kind of "handshake" we were looking for.
-- NOT yet confirmed for this exact unit: which jack (A or B) carries the RS-232 lines, the pinout, the baud rate and
-  the command bytes. These must come from the Synrad Firestar v-series operator's manual before anything is wired.
-- Important: that interface is on the laser, which is currently cabled to the controller. Talking to it directly
-  would mean tapping the laser's serial pins with a USB-RS232 adapter at the correct pinout - a separate, careful job.
+## Is there a protocol we could talk to? (correction, 2026-11-14)
+- An earlier version of this page said the Firestar has an RS-232 command interface. **That was an unsupported claim
+  from memory and is withdrawn.** The manual pages we could find for the v30 describe a hardware interface only:
+  control and status lines on the connectors, plus the three LEDs. No serial command set turned up.
+- What the manual snippets do say (partial, still to be checked against the full table before any wiring):
+  - Interface B (RJ45): pin 1 = PWM positive, an optoisolated input for the PWM/tickle signal; pin 2 = a 15 V DC
+    output (so it must never be connected to a logic input); pin 6 = laser-enable related input; pin 8 = ground.
+  - The OEM v30 has a **built-in tickle generator** (a pasted outside summary claimed the opposite).
+  - The laser has two interface connectors, A (DB-9, for new installations) and B (RJ45, legacy). **Never connect both
+    at once; the manual says that can damage the laser.** Our photos show the RJ45 (B) in use.
+  - Status information comes from the LEDs and from status outputs on the interface connectors.
+- So the practical test is not "send a command and read a reply" but "watch what the controller does to these lines".
+  A passive monitor sketch for that has been prepared but not run. Plugging the RJ45 into a PC network port is not
+  useful (it is not Ethernet) and is not recommended.
 
 ## Safety note
 - When RDY is lit the laser is armed: if the controller asserts the PWM command and gate, it WILL fire. Reading the
   laser's serial diagnostics is safe; sending any lase/gate command is not. Never command lasing without the beam
   contained, the key/interlock managed and people clear.
+
+## Photos
+![Laser installed in the machine](../images/11-laser-in-machine.jpg)
+
+The laser sits above and behind the controller rack. The RJ45 cable runs from the laser's interface jack to the
+controller area, the red and black cables are the 30 V supply, and the laser has further connectors below the RJ45.
+A second cable end with a plug hangs loose beside the laser in this photo; what it is has not been checked. (The
+sticker on the laser is blurred in this image.)
+
+![Laser model label](../images/12-laser-model-label.jpg)
+
+Model FSV30SAG, Firestar series v30, tested at 30 V, made October 2014. The serial number is blurred.
+
+![Interface B and status LEDs](../images/13-laser-interface-b-leds.jpg)
+
+Interface B jack with the RJ45 cable plugged in and the three status LEDs: LASE (red, off), RDY (yellow, on) and
+PWR (green, on).
+
+![Laser warning labels](../images/14-laser-warning-labels.jpg)
+
+Class 4 invisible-radiation warning and the output-power/wavelength label (the 75 W figure is the housing label,
+not this unit's 30 W output).

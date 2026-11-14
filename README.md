@@ -38,6 +38,7 @@ MIT: free to use, copy, modify, share and even sell, with the copyright notice k
 |---|---|
 | see what works and what does not | section 1 below |
 | learn the commands and packets | sections 4-7 below, `docs/Rayjet-Command-Reference.md` |
+| learn about the laser source and its interface | `docs/Laser-Source.md` |
 | understand the cards, LEDs and cable colours | `docs/Wiring-and-Card-Photos.md`, `docs/Rayjet-Board-Diagnostic-Guide.md`, `docs/Reference-Switch-Hypothesis.md`, `docs/Card-Swaps-and-Activation.md` |
 | help solve the front-back axis | section 9 below and [TODO.md](TODO.md) |
 | get an overview of the machine and its start-up | `docs/Machine-Overview.md` |
