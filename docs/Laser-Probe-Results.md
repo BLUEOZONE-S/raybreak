@@ -109,3 +109,17 @@ Observations:
 - `06` is a new machine state, reached only after `C6` plus a laser-flag move. It is the first sign that any command combination changes the controller's mode in a way the status reports. What `06` means is unknown (an operating, armed or error mode are all possible); whether the laser's LASE light came on at that moment still needs the owner's report.
 - Trials 7-16 (`C8`, `B3`, `B7`, `BB`, `BF`, `C3`, `C7`, `CB`, `CF`, `32` then `9F`) were not run.
 - `C6` before a move joins the commands that disturb the machine until understood.
+
+---
+
+## C6 repeated alone, 2026-11-14 18:11 (owner watching the LASE light: nothing lit)
+Sequence logged at 0.3 s resolution after a clean start (state 03, head parked at X = 10 mm):
+1. `46 00 C6 1A DA <1500> 9F <X=20 mm> 86` was accepted; the head moved 10 mm normally and the state returned to 03.
+2. The next ordinary move (`9E`, back to X = 10 mm) was **not executed**: the state byte read `06` and X stayed at 20 mm.
+3. Afterwards the link went silent (no handshake reply for ~90 s); a power cycle was required.
+
+Reading: it is repeatable. After `C6` (+ a `9F` move) the controller refuses the following move with state `06` and the
+communication layer stops answering. So `06` looks like a "refused / waiting" state that follows `C6`, not an
+operating mode that lights the laser. `C6` stays on the avoid list.
+
+State byte values seen so far: `03` idle, `04` moving, `06` refusing the next command after `C6`.
