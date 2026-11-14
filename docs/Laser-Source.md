@@ -42,9 +42,9 @@ Identified from the laser's own labels. This is the sealed CO2 source inside our
   useful (it is not Ethernet) and is not recommended.
 
 ## Safety note
-- When RDY is lit the laser is armed: if the controller asserts the PWM command and gate, it WILL fire. Reading the
-  laser's serial diagnostics is safe; sending any lase/gate command is not. Never command lasing without the beam
-  contained, the key/interlock managed and people clear.
+- When RDY is lit the laser is armed: if the controller asserts the PWM command and gate, it WILL fire. Watching the
+  laser's status lines passively is safe; driving any PWM, enable or gate line is not. Never command lasing without the
+  beam contained, the interlock managed and people clear.
 
 ## Photos
 ![Laser installed in the machine](../images/11-laser-in-machine.jpg)
