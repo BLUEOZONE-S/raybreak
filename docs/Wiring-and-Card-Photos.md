@@ -92,3 +92,6 @@ The small green glow at the top of each crop is a power LED, which stays lit in 
 The thin return wires (probable reference/limit switch cables) and their connectors are shown and discussed in [Reference-Switch-Hypothesis.md](Reference-Switch-Hypothesis.md) with an annotated photo.
 
 ![Return wires annotated](../images/07-return-wires-annotated.jpg)
+
+## Card naming update (2026-11-14)
+The backplane slots are labelled X-ACHSE, Y-ACHSE/RGV and Z-ACHSE: black card = X slot (left-right), blue card = Y slot (front-back), red card = Z slot. See [Card-Swaps-and-Activation.md](Card-Swaps-and-Activation.md).

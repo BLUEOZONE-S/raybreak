@@ -35,9 +35,28 @@ Safety: steps marked POWER OFF need the machine switched off AND unplugged. Phot
 
 ## 4. Motor plug swap (POWER OFF) - the decisive test
 - [ ] 4a. Photograph both connector blocks (blue card 000208, left-right card 000204).
-- [ ] 4b. Swap only the motor connectors between the two cards, power on, nudge to ready, command each axis.
-  - Result (does the fault follow the motor or stay on the card?):
+- [x] 4b. Motor plugs of X and Y swapped (owner, 2026-11-14): commanding X then moved the front-back beam.
+  - Result: the beam motor, its cable and the motor power are good; the fault stays on the Y card / its enabling. Card swaps between slots failed (cards seem slot-specific).
 - [ ] 4c. Restore the original connections and confirm the left-right axis still works.
+
+## 7. Activation problem (new 2026-11-14, see docs/Card-Swaps-and-Activation.md)
+Goal: make the machine reach "ready" without unplugging the Y reference-switch plug.
+- [ ] 7a. Record a baseline while ready: console GS/GE/GF, status bytes, diagnostic ids 0-8, full parameter table (use `tools/rayjet_report.py` plus `tools/rayjet_diag.py`).
+  - Result:
+- [ ] 7b. Reproduce the activation: start not ready, unplug and re-plug the Y reference-switch plug, and log what the console reports (GS) before and after.
+  - Result:
+- [ ] 7c. Once ready, record the baseline again and diff it with 7a. Does any value differ between "ready by nudge" and "ready by plug trick"?
+  - Result:
+- [ ] 7d. Thermal camera: compare the Y card's driver chip with the X card's while the machine is ready and holding.
+  - Result:
+- [ ] 7e. Hold test and motor-side voltage on the Y card vs the X card (same motor on both).
+  - Result:
+- [ ] 7f. Z reference switch: what does unplugging it do? (Be ready to hard-reset. Do NOT repeat on X: it locks the machine into safe mode.)
+  - Result:
+- [ ] 7g. Is the RGV-ACHSE slot populated? Photograph it.
+  - Result:
+- [ ] 7h. JTAG: identify the header pinout and adapter; read-only dump of one driver card for comparison. Nothing is ever written.
+  - Result:
 
 ## 5. If it is the card
 - [ ] 5a. Compare the pink rotary part, jumpers (JP8, JP9, yellow jumper) and the ES2 connector between the blue card and the left-right card.
@@ -66,3 +85,4 @@ Safety: steps marked POWER OFF need the machine switched off AND unplugged. Phot
 |---|---|---|
 | 2026-11-13 | Protocol decoded; left-right and Z verified; front-back tested at 3/10/25/50 mm and two speeds with camera on the LEDs; docs, photos and this list published | front-back still does not move |
 | 2026-11-13 (later) | Owner counted thin return wires: left-right 3, front-back 2, Z 2; outside CHA/CHB explanations compared with evidence; steps 1c-1g added; wire counts confirmed from new photos (front-back has pink+grey) | switch tests not yet run |
+| 2026-11-14 | Slot labels found (X-ACHSE black, Y-ACHSE/RGV blue, Z-ACHSE red); card swaps failed; motor-plug swap showed motor and wiring good; Y reference-switch unplug/replug enables the machine, X version locks safe mode; section 7 added | Y card or its activation is the suspect |

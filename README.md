@@ -26,7 +26,7 @@ MIT: free to use, copy, modify, share and even sell, with the copyright notice k
 1. **Run the read-only report** on your machine (it moves nothing, writes nothing, and skips the serial/licence block):
    ```bash
    pip install pyserial
-   python tools/rayjet_report.py --port COM3
+   python tools/rayjet_report.py --port COM3        # your port may be COM4 etc.; check Device Manager
    ```
    Then open a [Compatibility report](../../issues/new?template=compat-report.yml) and paste the result. A sample is in `data/example-report-rayjet50.md`.
 2. **Do a hardware test** from [TODO.md](TODO.md) if you have the same machine, then post it with the [Test result](../../issues/new?template=test-result.yml) form.
@@ -38,7 +38,7 @@ MIT: free to use, copy, modify, share and even sell, with the copyright notice k
 |---|---|
 | see what works and what does not | section 1 below |
 | learn the commands and packets | sections 4-7 below, `docs/Rayjet-Command-Reference.md` |
-| understand the cards, LEDs and cable colours | `docs/Wiring-and-Card-Photos.md`, `docs/Rayjet-Board-Diagnostic-Guide.md`, `docs/Reference-Switch-Hypothesis.md` |
+| understand the cards, LEDs and cable colours | `docs/Wiring-and-Card-Photos.md`, `docs/Rayjet-Board-Diagnostic-Guide.md`, `docs/Reference-Switch-Hypothesis.md`, `docs/Card-Swaps-and-Activation.md` |
 | help solve the front-back axis | section 9 below and [TODO.md](TODO.md) |
 | get an overview of the machine and its start-up | `docs/Machine-Overview.md` |
 
@@ -314,6 +314,8 @@ Green circles: the 30V / 5V / 3V3 rail LEDs, which looked lit on the driver card
 **Tests run on the front-back axis** (all reported complete, none moved the beam): 50 mm out and back, 10 mm, 3 mm, 25 mm, at 1500 and 4000 steps/s, with camera observation of the card LEDs.
 
 **LED observations (owner + camera):** on the blue card the CHA/CHB pair sometimes blinks, goes dark together during moves, or alternates; meanings are unsettled. Hypotheses: home/limit/range indicators versus drive-phase/activity indicators. Camera evidence leans to activity-linked, but that is inference. LEDs cannot be forced from software.
+
+**Latest findings (2026-11-14):** the backplane slots are labelled X-ACHSE (black card), Y-ACHSE/RGV (blue card) and Z-ACHSE (red card); swapping cards between slots stops the machine becoming ready, so cards seem slot-specific. Swapping the X and Y **motor plugs** made the X electronics drive the beam, so the beam motor, wiring and motor power are good and the fault sits on the Y card or its enabling. Unplugging and re-plugging the **Y reference-switch plug** also brings the machine to ready, like nudging the beam; doing it on X locks it into safe mode. Goal: find the command or state behind that activation. Details: [docs/Card-Swaps-and-Activation.md](docs/Card-Swaps-and-Activation.md).
 
 **New lead (needs testing):** each driver card has thin return wires from reference/limit switches. The owner counts 3 on the left-right card, 2 on the front-back card and 2 on the Z card, and the photos confirm it (the front-back card has a pink and a grey wire, the left-right card also a blue one). A missing or faulty reference-switch circuit would fit "counts steps, reports done, never moves" and the "not ready until the beam is nudged by hand" behaviour. Details and tests: [docs/Reference-Switch-Hypothesis.md](docs/Reference-Switch-Hypothesis.md).
 
