@@ -51,3 +51,24 @@ LASE-light observations: none reported at the time of writing; to be confirmed a
 - Untested: everything listed under trials 13-36, plus any move with the laser-flagged variant.
 - `GP` LASER_POWER stayed 0 throughout. No command found so far sets laser power.
 - Recovery each time: power-cycle; afterwards a read-only snapshot matched the earlier baseline.
+
+---
+
+## Resumed sweep, trials 13-18 (17:15, gap 1 s), owner watching the LASE light: no light seen
+| Trial | Command | Result |
+|---|---|---|
+| 13 | `CF` | no change in status or position |
+| 14 | `32` | no change |
+| 15-17 | `0A` channel 1, 2, 3 | no change |
+| 18 | `0A` channel 4 (`46 00 0A 04 86`) | the in-session canary failed straight after; the console then went silent and, after ~25 s, came back **with GS=1 (machine no longer ready)** |
+
+Observations that sharpen the picture:
+- The silent link is not a permanent hang: after `CD` and after `0A 04` the console recovered by itself or after a power
+  cycle, and the machine itself stayed alive (the owner could still move Z).
+- What actually changes is the **ready state**: after the trip the machine reports not ready (GS=1), the same state it
+  shows at power-on before the Y reference is completed. So these commands can drop the controller out of "ready".
+- No command so far has lit the laser's LASE light (owner), and `LASER_POWER` has stayed 0.
+
+Updated avoid list: `C9`, `CD`, `B1`, and `0A` with channel 4 (suspected trigger, trials 13-17 were clean).
+Still untested: trials 19-36 (`0C` channels 1-4, `80`, `8A`, `8C`, `8E`, `90`, `A2`, `44`, `16`, `B8`, and the five value+enable pairs).
+Speed note: a 1 s gap between trials works; each run still costs ~35 s of start-up checks.
