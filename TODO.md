@@ -41,11 +41,13 @@ Safety: steps marked POWER OFF need the machine switched off AND unplugged. Phot
 
 ## 7. Activation problem (new 2026-11-14, see docs/Card-Swaps-and-Activation.md)
 Goal: make the machine reach "ready" without unplugging the Y reference-switch plug.
-- [ ] 7a. Record a baseline while ready: console GS/GE/GF, status bytes, diagnostic ids 0-8, full parameter table (use `tools/rayjet_report.py` plus `tools/rayjet_diag.py`).
+- [x] 7a. Baseline recorded; the only self-changing values are Z, params 52/56/57/B8 and diag8 low word (2026-11-14).
+- [ ] 7a-old. Record a baseline while ready: console GS/GE/GF, status bytes, diagnostic ids 0-8, full parameter table (use `tools/rayjet_report.py` plus `tools/rayjet_diag.py`).
   - Result:
 - [ ] 7b. Reproduce the activation: start not ready, unplug and re-plug the Y reference-switch plug, and log what the console reports (GS) before and after.
   - Result:
-- [ ] 7c. Once ready, record the baseline again and diff it with 7a. Does any value differ between "ready by nudge" and "ready by plug trick"?
+- [x] 7b/7c. DONE: GQ tracks readiness (9997 not ready, 9982 referencing, 9998 ready); GS flips 1->0. Second plug-pull stops the machine, so it is the switch EDGE that matters. See docs/Phase1-Activation-Findings.md.
+- [ ] 7c-old. Once ready, record the baseline again and diff it with 7a. Does any value differ between "ready by nudge" and "ready by plug trick"?
   - Result:
 - [ ] 7d. Thermal camera: compare the Y card's driver chip with the X card's while the machine is ready and holding.
   - Result:
@@ -86,3 +88,4 @@ Goal: make the machine reach "ready" without unplugging the Y reference-switch p
 | 2026-11-13 | Protocol decoded; left-right and Z verified; front-back tested at 3/10/25/50 mm and two speeds with camera on the LEDs; docs, photos and this list published | front-back still does not move |
 | 2026-11-13 (later) | Owner counted thin return wires: left-right 3, front-back 2, Z 2; outside CHA/CHB explanations compared with evidence; steps 1c-1g added; wire counts confirmed from new photos (front-back has pink+grey) | switch tests not yet run |
 | 2026-11-14 | Slot labels found (X-ACHSE black, Y-ACHSE/RGV blue, Z-ACHSE red); card swaps failed; motor-plug swap showed motor and wiring good; Y reference-switch unplug/replug enables the machine, X version locks safe mode; section 7 added | Y card or its activation is the suspect |
+| 2026-11-14 (Phase 1) | Found GQ = readiness indicator (9997/9982/9998); not-ready state is console-only and stable; Y reference-switch plug acts as an edge trigger (2nd pull stops machine) | software activation must go over the ASCII console |
