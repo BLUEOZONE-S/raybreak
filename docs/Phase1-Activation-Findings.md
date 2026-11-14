@@ -48,3 +48,31 @@ The activation we want to trigger from software is the controller completing the
 read-only progress signal to watch while we look for a command that does the same thing. The not-ready state blocks the
 packet protocol entirely, so any software activation must work over the ASCII console, which is the only channel alive
 while not ready.
+
+## 6. Console activation probe - negative result (2026-11-14)
+From the not-ready state (GS=1, GQ=9997), we sent each known action verb once, with its accepted argument count,
+and watched GS/GQ for ~7 s. None activated the machine; all left it unchanged and responsive (no lock-ups):
+
+| Command sent | Result |
+|---|---|
+| `RS0,0,0,0` | no change |
+| `ST0,0,0` | no change |
+| `GO0,0,0,0,0` | no change |
+| `GC` | no change |
+| `PU0,0,0,0,0` | no change |
+
+So the simple console action verbs do not complete the Y reference. Remaining untried options are the unknown
+setters `ID` and `PS` (higher risk) and non-zero argument variations. Because the not-ready state exposes only the
+console, and the readiness transition is driven by the reference-switch **edge** (section 4), the current best
+understanding is that the firmware completes referencing on a physical switch event, and no plain console verb
+substitutes for it.
+
+## 7. Practical conclusion
+Two separate problems were being conflated:
+1. **Reaching "ready".** Caused by Y referencing never completing (the beam never moves, so its reference switch
+   never trips). Worked around by toggling the Y switch plug. No simple console command reproduces it yet.
+2. **Y not moving when commanded.** The motor-plug swap proved the Y motor, cable and power are good, so the Y
+   **driver card output** is the suspect. This is a hardware fault; software cannot move a motor whose driver
+   output is dead.
+Even a software "force ready" would not fix problem 2. The decisive next steps for movement are hardware:
+the thermal-camera and motor-voltage comparison of the Y card against the X card (TODO 7d/7e).
