@@ -49,7 +49,7 @@ Goal: make the machine reach "ready" without unplugging the Y reference-switch p
 - [x] 7b/7c. DONE: GQ tracks readiness (9997 not ready, 9982 referencing, 9998 ready); GS flips 1->0. Second plug-pull stops the machine, so it is the switch EDGE that matters. See docs/Phase1-Activation-Findings.md.
 - [ ] 7c-old. Once ready, record the baseline again and diff it with 7a. Does any value differ between "ready by nudge" and "ready by plug trick"?
   - Result:
-- [ ] 7d. Thermal camera: compare the Y card's driver chip with the X card's while the machine is ready and holding.
+- [ ] 7d. **DECIDING TEST** Thermal camera / scope: does the Y driver chip switch and output when Y is commanded? Cold = dead output stage; switching-but-no-motion = enable/switch problem. Compare the Y card's driver chip with the X card's while the machine is ready and holding.
   - Result:
 - [ ] 7e. Hold test and motor-side voltage on the Y card vs the X card (same motor on both).
   - Result:
@@ -89,3 +89,4 @@ Goal: make the machine reach "ready" without unplugging the Y reference-switch p
 | 2026-11-13 (later) | Owner counted thin return wires: left-right 3, front-back 2, Z 2; outside CHA/CHB explanations compared with evidence; steps 1c-1g added; wire counts confirmed from new photos (front-back has pink+grey) | switch tests not yet run |
 | 2026-11-14 | Slot labels found (X-ACHSE black, Y-ACHSE/RGV blue, Z-ACHSE red); card swaps failed; motor-plug swap showed motor and wiring good; Y reference-switch unplug/replug enables the machine, X version locks safe mode; section 7 added | Y card or its activation is the suspect |
 | 2026-11-14 (Phase 1) | Found GQ = readiness indicator (9997/9982/9998); not-ready state is console-only and stable; Y reference-switch plug acts as an edge trigger (2nd pull stops machine) | software activation must go over the ASCII console |
+| 2026-11-14 (root cause) | One fact explains the startup hang, the plug trick and the 2nd-toggle stop: the Y beam never moves to its zero switch. Motor/wiring good, so Y card output is the suspect. See docs/Root-Cause.md | thermal/scope test on Y card decides dead-output vs enable problem |
