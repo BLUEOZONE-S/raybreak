@@ -92,3 +92,20 @@ Speed note: a 1 s gap between trials works; each run still costs ~35 s of start-
 Conclusion so far: none of the opcodes in the known layout table, sent with a small value, turns the laser on or changes
 what the controller reports about it. Not yet tried: the laser-flagged move variant `9F` after each enable, larger/other
 values, longer enable sequences, and any opcode outside the layout table.
+
+---
+
+## 9F laser-flag move tests, head parked at X = 10 mm, 2026-11-14 17:28 (owner watching the LASE light)
+Each trial: a 10 mm move to the right with the alternate move opcode `9F` (no power set), alone or preceded in the
+same block by one harmless no-argument command; then an ordinary `9E` move back.
+
+| Trial | Block | Result |
+|---|---|---|
+| 1-3 | `46 00 1A DA <speed> 9F X Y 86`, speeds 3000 / 1500 / 600 | moved normally, state byte 03 afterwards |
+| 4-5 | `C2` or `C4` then the `9F` move | moved normally |
+| 6 | `C6` then the `9F` move (`46 00 C6 1A DA 00 00 05 DC 9F 00 00 0F A0 00 00 00 00 86`) | the move finished at X=20 mm but the **state byte read `06`** (never seen before; 03 = idle, 04 = moving), the return move did not complete at first, and the console later went silent |
+
+Observations:
+- `06` is a new machine state, reached only after `C6` plus a laser-flag move. It is the first sign that any command combination changes the controller's mode in a way the status reports. What `06` means is unknown (an operating, armed or error mode are all possible); whether the laser's LASE light came on at that moment still needs the owner's report.
+- Trials 7-16 (`C8`, `B3`, `B7`, `BB`, `BF`, `C3`, `C7`, `CB`, `CF`, `32` then `9F`) were not run.
+- `C6` before a move joins the commands that disturb the machine until understood.
