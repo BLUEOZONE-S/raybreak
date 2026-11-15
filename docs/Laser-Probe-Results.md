@@ -123,3 +123,19 @@ communication layer stops answering. So `06` looks like a "refused / waiting" st
 operating mode that lights the laser. `C6` stays on the avoid list.
 
 State byte values seen so far: `03` idle, `04` moving, `06` refusing the next command after `C6`.
+
+---
+
+## Console PD and the remaining 9F trials, 2026-11-14 19:29-19:34 (owner watching the LASE light: nothing came on)
+- Console `PD` with no arguments was accepted without an error (0 args is the accepted count), followed by `PU`: no light, machine unchanged.
+- `PD`, then a `9F` packet move (+10 mm), then `PU`: all accepted, state stayed 03, no light.
+- Trial 7 (`C8` then `9F`): moved normally.
+- **Trial 8 (`B3` then `9F`): the move did not run (X stayed at 10 mm) and the Z counter changed from 111092 to 143771 with no Z
+  command.** The same thing happened in the first stacked test, where `B1`+`B3` changed Z from 120277 to 247035 and the moves
+  stopped executing.
+
+Reading (INFERRED): **`B3` is a Z-axis action, probably the autofocus/table routine**. The backplane has a connector labelled AUTO-FOCUS, and
+this fits both events: the controller starts a Z run, Z changes, and the X move is ignored while it is busy.
+`B3` alone had looked harmless earlier because the Z change was not measured against a running move; before-and-after Z
+readings should be compared whenever it is tried. `B3` is excluded from further sweeps until understood. Trials 9-16
+(`B7`, `BB`, `BF`, `C3`, `C7`, `CB`, `CF`, `32` before a `9F` move) remain untested.
