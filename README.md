@@ -167,6 +167,9 @@ This is why it matters for the laser work too: because Y never truly referenced,
 
 ## The command hunt — what we've tried vs. what's left
 
+> ### 📊 [**Open the interactive command matrix →**](https://blueozone-s.github.io/raybreak/laser-matrix.html)
+> A filterable page of every opcode, its syntax, its result and the exact bytes — colour-coded by tried / disturbs the machine / not tried. *(Live once GitHub Pages is enabled; the same data is in the tables below and in [docs/Laser-Matrix.md](docs/Laser-Matrix.md).)*
+
 We are looking for the packet command that turns the laser on. Every command below is a block framed `46 00 … 86` in the SF packet protocol; a normal move is `9E`, the **laser-flagged** move is `9F`. The laser's **LASE light has stayed dark in every trial.**
 
 **Legend:** ✅ tried, harmless · ⚠️ tried, disturbs the machine (needs a power cycle) · ⬜ not tried · ⛔ irreversible, excluded
