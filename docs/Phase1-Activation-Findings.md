@@ -85,3 +85,17 @@ Every diagnostic id from 0x0000 to 0xFFFF was requested (read-only, 16 per packe
 - Every other id returns padding: the second value is always 0xFFFFFFFF and the first is the id's low byte (plus 0x10000
   for most of the range). There are no hidden regions of data in the diagnostic channel.
 So the diagnostic channel is fully mapped and is not a window onto the controller's memory or code.
+
+## 9. The second state byte follows the Y beam (2026-11-14, 19:09-19:10)
+The machine's state reply (`11` plus 4 bytes) reads `03 03 04 00` when idle. While watching it and four status flags
+(requests `42`, `A0`, `AC`, `AE`) during a hand nudge of the Y beam:
+- Request `42` is answered with tag `43` (flag present); `A0`, `AC` and `AE` are answered with nothing (flag absent).
+  None of them changed during the test.
+- The **second state byte changed from `03` to `02`** at 19:09:54 while the beam was displaced by hand, and returned to
+  `03` at 19:10:13 when it was put back. No commanded move was involved.
+
+Reading (INFERRED, one test): bit 0 of state byte 1 follows the Y beam position, most likely the Y reference/zero
+switch (set at the rest position, clear when the beam is moved away). That means the controller's own report shows
+whether the Y switch is active, which gives a read-only way to watch the thing the start-up logic depends on.
+Not yet known: whether bit 1 of the same byte is the X head's switch (the head moved 10 mm during canaries without
+the byte changing), and what bytes 2 and 3 (`04`, `00`) encode (interlock and the lid are the obvious candidates).
