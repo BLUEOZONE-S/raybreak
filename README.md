@@ -43,6 +43,7 @@ MIT: free to use, copy, modify, share and even sell, with the copyright notice k
 | see which card drives which axis | [The controller cards](#the-controller-cards--which-card-is-which-axis) |
 | see what laser commands we tried | [The command hunt](#the-command-hunt--what-weve-tried-vs-what-is-left), `docs/Laser-Matrix.md` |
 | understand why the front-back axis won't move | [docs/Root-Cause.md](docs/Root-Cause.md) |
+| force a stuck machine to become ready | [Why Y is stuck, and the reference-switch trick](#why-the-y-axis-is-stuck-and-how-to-force-the-machine-to-ready) |
 | see what works and what does not | section 1 below |
 | learn the commands and packets | sections 4-7 below, `docs/Rayjet-Command-Reference.md` |
 | understand the cards, LEDs and cable colours | `docs/Wiring-and-Card-Photos.md`, `docs/Rayjet-Board-Diagnostic-Guide.md`, `docs/Reference-Switch-Hypothesis.md`, `docs/Card-Swaps-and-Activation.md` |
@@ -123,6 +124,44 @@ The three stepper-driver cards look identical but are **slot-specific**: swappin
 <img src="images/07-return-wires-annotated.jpg" width="330" alt="Return wires per card, boxes coloured by cable shrink">
 </p>
 <p align="center"><em>Left: the cards' build stickers (000204, 000208, 000076). Right: the thin reference-switch return wires — 3 on the X card, 2 on Y, 2 on Z. Details in <a href="docs/Wiring-and-Card-Photos.md">Wiring-and-Card-Photos.md</a> and <a href="docs/Card-Swaps-and-Activation.md">Card-Swaps-and-Activation.md</a>.</em></p>
+
+---
+
+## Why the Y axis is stuck, and how to force the machine to "ready"
+
+This is the single most useful thing we learned. If your Rayjet powers on but **never becomes ready** (the `GS;` query returns `1`, the handshake is ignored, the Z buttons do nothing), here is what is happening and how to get past it.
+
+### What the machine is waiting for
+
+At power-on the controller **references every axis**: it drives each one until that axis trips its **zero (reference) switch**, which marks the axis "homed". Only when all axes are referenced does the machine report ready.
+
+- **X (head)** and **Z (table)** reference normally — they move, hit their switches, done.
+- **Y (the beam) never moves**, so it never reaches its zero switch, so Y referencing **never finishes**. The whole machine sits in "not ready" forever, waiting for Y.
+
+So one fact — *the Y beam doesn't move to its switch* — explains the stuck start-up.
+
+### The suspect: a dead or disabled Y driver card
+
+We proved the Y **motor, cable and 30 V supply are good** by swapping the X and Y motor plugs: with the plugs swapped, commanding X physically moved the beam. So the beam motor works fine when driven by a *different* card. That points the fault at the **Y driver card itself** — most likely its motor-drive output stage is dead or not being enabled. The cards are slot-specific (swapping them between slots stops the machine becoming ready), so a bad card can't just be moved.
+
+> The deciding test still to do: a thermal camera or scope on the Y card's motor-output pins while commanding Y. Cold/no output = dead output stage; switching but no motion = an enable problem. See [docs/Root-Cause.md](docs/Root-Cause.md).
+
+### The trick: pull the Y zero-switch plug to complete start-up
+
+Because referencing is waiting for the Y zero switch to *change state*, you can supply that change by hand and let the machine finish its proper start-up sequence:
+
+1. Power on and let it try to reference (table drops, etc.).
+2. With the machine in the not-ready state, **unplug the Y reference-switch connector and plug it back in, once.** This toggles the switch line; the controller sees the state change it was waiting for, marks Y referenced, and the machine **becomes ready** (`GS;` goes `1 → 0`, and the `GQ;` value steps `9997 → 9982 → 9998`).
+3. The machine now accepts the handshake and commands; X and Z move normally.
+
+Moving the beam a few millimetres **by hand** does the same thing (it nudges the switch).
+
+> **Important cautions**
+> - **Do it only once.** A *second* pull while the machine is already referenced reads as a fault and **stops the machine** — it has to be rebooted.
+> - **Never do this on the X reference switch** — it locks the machine into a safe mode that needs a hard power-cycle.
+> - This gets the machine *ready*, but **Y still won't move on command** afterwards — the underlying Y card fault is unchanged. The trick is for using the rest of the machine (and for our testing), not a repair.
+
+This is why it matters for the laser work too: because Y never truly referenced, the controller appears to **gate** laser-firing behind that unmet condition (see the command hunt below).
 
 ---
 
