@@ -99,3 +99,18 @@ switch (set at the rest position, clear when the beam is moved away). That means
 whether the Y switch is active, which gives a read-only way to watch the thing the start-up logic depends on.
 Not yet known: whether bit 1 of the same byte is the X head's switch (the head moved 10 mm during canaries without
 the byte changing), and what bytes 2 and 3 (`04`, `00`) encode (interlock and the lid are the obvious candidates).
+
+## 10. Correction to section 9: that state bit most likely follows the door, not the Y beam (2026-11-14, 19:14)
+A second watch, this time for an X-head nudge, showed the second state byte drop from `03` to `02` at t+3.3 s, before the head
+could have been touched, and the link then dropped at t+11 s. The owner confirmed the lid has to be opened to reach the
+head or beam by hand. So in both tests the byte most likely changed because **the lid was opened**, and returned to `03` when
+the lid was closed again (about 19 s later in the first test). The conclusion of section 9 ("bit 0 follows the Y beam") was
+drawn from one test in which the lid state was not recorded and is **withdrawn**.
+
+Working reading now (INFERRED): **bit 0 of state byte 1 = lid/interlock closed** (1 = closed, 0 = open). Opening the lid
+also drops the machine's communication within a few seconds, which fits the documented behaviour that opening a cover stops
+the machine and takes a few seconds to recover after closing.
+
+Method note for the next test: record the lid state explicitly. To see the Y or X switch bits, the beam/head would need
+to be moved without opening the lid (not possible by hand), so those switches are probably only observable when the
+machine moves them itself.
