@@ -41,3 +41,27 @@ Write X-like values into the Y block entries at 0x89, 0x8A and 0x8B (500, 28000,
 Y move. If the beam moves, the missing Y entries are the cause. If nothing changes, the zeros are just unused fields.
 Writing parameters is the kind of change that earlier hung or disturbed the machine in other opcodes, so each write
 would be read back and followed by the canary, one at a time.
+
+## Result of the test (2026-11-14, 19:20)
+Three RAM writes were made with the table write command (`46 00 1A <index> <value, 4 bytes> 86`), each read back correctly and
+followed by a passing left-right canary:
+
+| Entry | Was | Written |
+|---|---|---|
+| 0x89 | 0 | 500 |
+| 0x8A | 0 | 28000 |
+| 0x8B | 0 | 27000 |
+
+Nothing else in the table changed. A 2 mm Y move was then commanded and the Y counter reached 400 and returned to 0, but
+the owner saw **no physical movement** of the beam. So filling those three zero entries with X's values does not make the
+Y axis move; they are either unused fields or not the missing piece. (Side result: the table write command works and is
+reversible by a power cycle; nothing was ever stored.)
+
+Differences between the X and Y blocks that were NOT tested: entries +12, +14, +15 and +16 (0x84, 0x86, 0x87, 0x88), where Y has
+25000, 300, 0 and 4500 against X's 20000, 100, 100 and 100. Those may simply be genuine X/Y differences, so copying them
+blindly is a weak lead.
+
+## Better discriminator (hardware)
+The earlier motor-plug swap showed the X electronics can drive the beam motor. The reverse was not recorded: with the plugs
+swapped, does commanding Y make the **head** move? Yes = the Y card's output stage works and the fault is in how it is
+enabled or configured. No = the Y output stage itself is dead.
