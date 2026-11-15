@@ -36,9 +36,13 @@ MIT: free to use, copy, modify, share and even sell, with the copyright notice k
 ## Where to look
 | I want to... | Go to |
 |---|---|
+| read what happened most recently | [Session summary (2026-11-14)](#session-summary--2026-11-14) |
+| learn about the laser source and its interface | [The laser source](#the-laser-source-synrad-firestar-v30), `docs/Laser-Source.md` |
+| see which card drives which axis | [The controller cards](#the-controller-cards--which-card-is-which-axis) |
+| see what laser commands we tried | [The command hunt](#the-command-hunt--what-weve-tried-vs-what-is-left), `docs/Laser-Matrix.md` |
+| understand why the front-back axis won't move | [docs/Root-Cause.md](docs/Root-Cause.md) |
 | see what works and what does not | section 1 below |
 | learn the commands and packets | sections 4-7 below, `docs/Rayjet-Command-Reference.md` |
-| learn about the laser source and its interface | `docs/Laser-Source.md` |
 | understand the cards, LEDs and cable colours | `docs/Wiring-and-Card-Photos.md`, `docs/Rayjet-Board-Diagnostic-Guide.md`, `docs/Reference-Switch-Hypothesis.md`, `docs/Card-Swaps-and-Activation.md` |
 | help solve the front-back axis | section 9 below and [TODO.md](TODO.md) |
 | get an overview of the machine and its start-up | `docs/Machine-Overview.md` |
@@ -49,6 +53,129 @@ MIT: free to use, copy, modify, share and even sell, with the copyright notice k
 - Anyone who recognises the **SM-NG driver cards** (Trinamic TMC249 + TI TMS320LF2407) and can explain what the **CHA / CHB** LEDs and the jumpers mean.
 - People who can **measure** (voltages, motor winding resistance) and report numbers.
 - Ideas for a friendlier tool: a GUI, a job sender, Linux/macOS support.
+
+---
+
+## Session summary — 2026-11-14
+
+A full day of live testing on the machine. Headlines:
+
+- **Identified the laser source: a Synrad Firestar v30** (30 W RF-excited sealed CO₂, model `FSV30SAG`, built Oct 2014). Its "ethernet" cable is **not** a network — it carries hardware control/status signals to the controller. See [the laser section](#the-laser-source-synrad-firestar-v30) below.
+- **Mapped the controller's readiness logic.** The console value `GQ` tracks readiness (`9997` not-ready → `9982` referencing → `9998` ready). The not-ready state answers only on the ASCII console; the packet protocol is dead until the machine references.
+- **Found the root cause of the front-back (Y) fault.** One fact explains the start-up hang, the plug trick, and why a second plug-pull stops the machine: **the Y beam never moves to its zero switch, so referencing never completes.** The earlier motor-plug swap proved the motor and wiring are good, so the fault is the Y driver card. See [docs/Root-Cause.md](docs/Root-Cause.md).
+- **Ruled out a configuration cause for Y.** Writing X-like values into the Y parameter block (RAM only) did not make Y move.
+- **Ran a large, careful hunt for the laser-on command** — dozens of opcodes and sequences, with the LASE light watched live by webcam. **Nothing has lit the laser yet.** The pattern suggests the laser path is *gated* behind the unreferenced Y axis. Full matrix below.
+- **Confirmed the diagnostic channel** holds data only at ids 0–8 (scanned all 65536).
+- Every finding is written up in `docs/` and the whole working tree is backed up.
+
+> **Interactive version:** the command matrix is also a filterable page — [laser-matrix.html](laser-matrix.html) (open locally) — with every opcode, its syntax, its result, and the exact bytes.
+
+---
+
+## The laser source: Synrad Firestar v30
+
+<p align="center">
+<img src="images/11-laser-in-machine.jpg" width="440" alt="The Synrad Firestar v30 laser mounted in the Rayjet, cabled to the controller board">
+<img src="images/12-laser-model-label.jpg" width="300" alt="Synrad Firestar v30 model label, model FSV30SAG">
+</p>
+<p align="center"><em>Left: the laser sits above the controller rack; the pale cable from its interface jack runs to the green controller board, and the red/black pair is the 30&nbsp;V supply. Right: the model label — FSV30SAG, Firestar series v30, tested at 30&nbsp;V, built October 2014.</em></p>
+
+| Fact | Value |
+|---|---|
+| Maker / series / model | Synrad · Firestar v · **FSV30SAG** |
+| Type | RF-excited, sealed **CO₂**, ~10.6 µm |
+| Rated power | **30 W** (the "75 W MAX" sticker is a generic housing ceiling) |
+| Supply | 30 V DC |
+| Control connector | RJ45 **"Interface B"** — hardware signals, **not** Ethernet |
+| Built | October 2014 · Class 4 |
+
+<p align="center">
+<img src="images/13-laser-interface-b-leds.jpg" width="360" alt="Interface B RJ45 jack with LASE, RDY and PWR status LEDs">
+<img src="images/14-laser-warning-labels.jpg" width="360" alt="Class 4 laser warning and 75 W max wavelength label">
+</p>
+<p align="center"><em>Left: the Interface B jack with the three status LEDs — <b>PWR</b> (green, on), <b>RDY</b> (yellow, on), <b>LASE</b> (red, off): the laser is powered, armed, and not firing, so the source itself is healthy. Right: the Class 4 warning labels.</em></p>
+
+**How it connects and is controlled.** The RJ45 runs from the laser to the **Rayjet controller board**, not to the PC (the PC's own Ethernet port is physically disconnected — verified). On these Synrad lasers the control is a 5 V **PWM** signal (a low-duty "tickle" keeps the gas primed; higher duty = more power) plus a gate/enable and an interlock. There is no packet "handshake" with the laser — the controller generates its signals. Full notes, pinout and corrections in [docs/Laser-Source.md](docs/Laser-Source.md).
+
+> **Safety.** When RDY is lit the laser is armed. Reading status is safe; driving any PWM/enable/gate line is not. We never command lasing without the beam contained and people clear.
+
+---
+
+## The controller cards — which card is which axis
+
+The three stepper-driver cards look identical but are **slot-specific**: swapping them between slots stops the machine from becoming ready. The backplane silkscreen names each slot, and we identify each card by the heat-shrink colour on its motor cable.
+
+<p align="center">
+<img src="images/10-backplane-slot-labels.jpg" width="500" alt="Backplane silkscreen labels: X-ACHSE, Y-ACHSE/RGV, Z-ACHSE">
+</p>
+<p align="center"><em>Backplane slot labels — <b>X-ACHSE</b>, <b>Y-ACHSE / RGV</b>, <b>Z-ACHSE</b> ("Achse" = axis). RGV is probably the rotary attachment.</em></p>
+
+| Slot label | Card (cable shrink) | Our axis name | Moves? |
+|---|---|---|---|
+| **X-ACHSE** | black | left-right (head) | ✅ works |
+| **Y-ACHSE / RGV** | blue | front-back (beam) | ❌ **does not move** |
+| **Z-ACHSE** | red | table up/down | ✅ works |
+
+<p align="center">
+<img src="images/03-card-labels-and-connectors.jpg" width="330" alt="Driver card serial stickers">
+<img src="images/07-return-wires-annotated.jpg" width="330" alt="Return wires per card, boxes coloured by cable shrink">
+</p>
+<p align="center"><em>Left: the cards' build stickers (000204, 000208, 000076). Right: the thin reference-switch return wires — 3 on the X card, 2 on Y, 2 on Z. Details in <a href="docs/Wiring-and-Card-Photos.md">Wiring-and-Card-Photos.md</a> and <a href="docs/Card-Swaps-and-Activation.md">Card-Swaps-and-Activation.md</a>.</em></p>
+
+---
+
+## The command hunt — what we've tried vs. what's left
+
+We are looking for the packet command that turns the laser on. Every command below is a block framed `46 00 … 86` in the SF packet protocol; a normal move is `9E`, the **laser-flagged** move is `9F`. The laser's **LASE light has stayed dark in every trial.**
+
+**Legend:** ✅ tried, harmless · ⚠️ tried, disturbs the machine (needs a power cycle) · ⬜ not tried · ⛔ irreversible, excluded
+
+### Packet opcodes (known layout table)
+
+| Opcode | Syntax | Alone | Before `9F` move | Result |
+|---|---|---|---|---|
+| `C2` `C4` `C8` | no-arg | ✅ | ✅ | move runs normally, no light |
+| `C3` `C7` `CB` `CF` `32` | no-arg | ✅ | ⬜ | no change alone |
+| `BB` `BF` | no-arg (enable halves) | ⬜ | ⬜ | untried |
+| `B3` `B7` | no-arg | ✅ | ⚠️ | **move silently dropped** before it |
+| `C6` | no-arg | ✅ | ⚠️ | next move refused (state `06`), link silent |
+| `CD` | no-arg | ⚠️ | — | canary failed, params changed, link silent |
+| `B9` `BD` `C1` `C5` | 32-bit value | ✅ | ⬜ | no change alone |
+| `8A` `8C` `8E` `90` | 32-bit value | ✅ | ⬜ | no change alone |
+| `B1` | 32-bit value | ⚠️ | — | Z counter jumped, moves stopped |
+| `B5` `80` | 16-bit value | ✅ | ⬜ | no change alone |
+| `AE` | 16-bit value | ⬜ | — | licence-adjacent — care |
+| `C9` | 8-bit value | ⚠️ | — | machine stopped answering |
+| `0A` `0C` ch 1–3 | channel byte | ✅ | ⬜ | no change |
+| `0A` ch 4 | channel byte | ⚠️ | — | dropped out of ready |
+| `A2` `44` `16` `B8` | multi-field | ✅ | ⬜ | no change alone |
+| `9F` | laser-flag move | ✅ (3 speeds) | — | moves, no light |
+
+### Value + enable pairs (the "job pattern")
+
+| Pair | Alone | As `value + enable + 9F move` |
+|---|---|---|
+| `B5+B7` | ✅ harmless | ⚠️ move dropped |
+| `B9+BB` `BD+BF` `C1+C3` `C5+C7` | ⬜ | ⬜ |
+
+### Console verbs
+
+| Verb | Args | Status | What it did |
+|---|---|---|---|
+| `PD` (pen-down / laser-on in HPGL) | 0 | ✅ | accepted, ran once, **no light** |
+| `PD` then `9F` move then `PU` | — | ✅ | all accepted, state idle, no light |
+| `PU` `GO` `ST` `RS` `GC` | 0–5 | ✅ | accepted, no visible effect |
+| `PS` `ID` | 2+/1 | ⬜ | setters of unknown effect — not sent |
+
+### Commands that disturb the machine (avoid list)
+
+`C9` · `CD` · `B1` · `C6` (before a move) · `B3`/`B7` (before a move) · `0A` channel 4 — each knocked the controller out of its working state and needed a power cycle.
+
+### Still to try
+
+The remaining `move`/`pair`/`job` contexts above, writing the laser parameters (`4A`–`4F`, `DE`) then moving, and the ~190 opcodes **outside** the known table (highest risk). The harness in [tools/laser_matrix.py](tools/laser_matrix.py) runs these in sections with a canary check and full recording.
+
+**Leading theory:** when an enable-style opcode precedes a move, the controller **silently drops the move** instead of firing. That looks like the laser path is gated behind a condition the machine won't meet — most likely the unreferenced Y axis. If so, the laser may stay dark until the Y card is fixed, and no command will override it.
 
 ---
 

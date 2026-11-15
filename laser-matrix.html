@@ -1,0 +1,244 @@
+<title>Rayjet Command Matrix</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: a technical reference — fixed masthead, filter bar, dense status grid of every command permutation */
+  :root{
+    --bg:#0e1116; --panel:#161b23; --panel2:#1b212b; --line:#2a323f; --fg:#e6edf3; --mut:#8b97a7;
+    --accent:#36b3a8; --ok:#3fb950; --warn:#d29922; --bad:#f85149; --todo:#58a6ff; --irr:#a371f7;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:"Inter",system-ui,sans-serif; --disp:"Space Grotesk","Inter",system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){
+    --bg:#f4f6f9; --panel:#fff; --panel2:#eef1f5; --line:#d7dee6; --fg:#131821; --mut:#5a6673;
+    --accent:#0f8b80; --ok:#1a7f37; --warn:#9a6700; --bad:#cf222e; --todo:#0969da; --irr:#8250df; color-scheme:light }}
+  :root[data-theme="light"]{
+    --bg:#f4f6f9; --panel:#fff; --panel2:#eef1f5; --line:#d7dee6; --fg:#131821; --mut:#5a6673;
+    --accent:#0f8b80; --ok:#1a7f37; --warn:#9a6700; --bad:#cf222e; --todo:#0969da; --irr:#8250df; color-scheme:light }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--fg);font-family:var(--sans);line-height:1.5;margin:0}
+  .wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+  header.mast{border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--bg))}
+  .mast .wrap{padding-block:26px 20px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+  h1{font-family:var(--disp);font-weight:600;font-size:clamp(26px,5vw,40px);margin:0;text-wrap:balance;letter-spacing:-.01em}
+  .sub{color:var(--mut);margin:10px 0 0;max-width:68ch}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:18px 0 0;font-size:13px;font-family:var(--mono)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .dot{width:11px;height:11px;border-radius:3px;flex:none}
+  .d-ok{background:var(--ok)} .d-bad{background:var(--bad)} .d-todo{background:var(--todo)} .d-irr{background:var(--irr)}
+  section{padding-block:30px;border-bottom:1px solid var(--line)}
+  h2{font-family:var(--disp);font-weight:600;font-size:22px;margin:0 0 4px;letter-spacing:-.01em}
+  h2 .n{font-family:var(--mono);color:var(--mut);font-size:14px;font-weight:400;margin-left:8px}
+  .lead{color:var(--mut);margin:0 0 18px;max-width:72ch}
+  .counts{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 20px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:90px}
+  .stat b{font-family:var(--disp);font-size:24px;display:block;font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+  .filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+  .filters button{font-family:var(--mono);font-size:12.5px;background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:6px 13px;cursor:pointer}
+  .filters button[aria-pressed="true"]{background:var(--accent);color:#06100f;border-color:var(--accent);font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+  .cmd{background:var(--panel);border:1px solid var(--line);border-left-width:3px;border-radius:9px;padding:12px 13px;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .cmd.ok{border-left-color:var(--ok)} .cmd.bad{border-left-color:var(--bad)} .cmd.todo{border-left-color:var(--todo)} .cmd.irr{border-left-color:var(--irr)}
+  .cmd .op{font-family:var(--mono);font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .cmd .op .st{font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:5px;font-weight:600;white-space:nowrap}
+  .st.ok{background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok)}
+  .st.bad{background:color-mix(in srgb,var(--bad) 20%,transparent);color:var(--bad)}
+  .st.todo{background:color-mix(in srgb,var(--todo) 20%,transparent);color:var(--todo)}
+  .st.irr{background:color-mix(in srgb,var(--irr) 20%,transparent);color:var(--irr)}
+  .cmd .desc{font-size:12.5px;color:var(--mut)}
+  .cmd .bytes{font-family:var(--mono);font-size:11.5px;color:var(--fg);background:var(--panel2);border-radius:5px;padding:4px 7px;overflow-x:auto;white-space:nowrap}
+  table{border-collapse:collapse;width:100%;font-size:13.5px}
+  .tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);background:var(--panel)}
+  td.k{font-family:var(--mono);font-weight:600}
+  tr:last-child td{border-bottom:none}
+  .pill{font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:5px;font-weight:600}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:620px){.two{grid-template-columns:1fr}}
+  .note{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:13.5px;color:var(--mut)}
+  .note b{color:var(--fg)}
+  code{font-family:var(--mono);background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:.92em}
+  footer{padding-block:24px;color:var(--mut);font-size:12.5px}
+  .toggle{position:fixed;top:env(safe-area-inset-top,10px);right:14px;z-index:20;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:6px 10px;font-family:var(--mono);font-size:12px;cursor:pointer}
+</style>
+
+<button class="toggle" id="themeBtn" aria-label="Toggle theme">◐ theme</button>
+
+<header class="mast"><div class="wrap">
+  <p class="eyebrow">Trotec Rayjet 50 · Synrad Firestar v30 · reverse-engineering log</p>
+  <h1>Laser Command Matrix</h1>
+  <p class="sub">Every command and syntax the controller accepts on COM4, and whether we've sent it while hunting for what turns the laser on. The laser's <b>LASE</b> indicator has stayed dark in every trial so far. Nothing here is theory about the Synrad — it's what the Rayjet controller does when we send it bytes.</p>
+  <div class="legend">
+    <span><i class="dot d-ok"></i>Tried — harmless</span>
+    <span><i class="dot d-bad"></i>Tried — disturbs machine</span>
+    <span><i class="dot d-todo"></i>Not tried yet</span>
+    <span><i class="dot d-irr"></i>Irreversible — excluded</span>
+  </div>
+</div></header>
+
+<div class="wrap">
+
+<section id="how">
+  <h2>How the machine is addressed</h2>
+  <p class="lead">One USB-serial port carries two separate languages. Everything we send to move anything — or to try to fire the laser — is a <b>packet command block</b> in the data part of an SF packet, framed <code>46 00 … 86</code>.</p>
+  <div class="two">
+    <div class="note"><b>ASCII console</b> — 19200 8N1, <code>\n\n\n</code> + verb + <code>;</code>. Only the first two letters are the verb; arguments are comma-separated numbers. Used for status (<code>GS</code>, <code>GP</code>, <code>GQ</code>) and the <code>TS;</code> handshake. Wrong argument count returns <i>"Illegal number of parameters"</i>, which proves a verb exists without running it.</div>
+    <div class="note"><b>SF packet protocol</b> — after the handshake, 460800 baud, CRC-framed. A command block is <code>46 00</code> then one or more opcodes then <code>86</code>. A move is <code>1A DA &lt;speed&gt; 9E &lt;x&gt; &lt;y&gt;</code>; the laser-flagged move uses <code>9F</code> instead of <code>9E</code>. Power/enable opcodes, if they exist, live among the <code>B0–CF</code> block.</div>
+  </div>
+</section>
+
+<section id="matrix">
+  <h2>Packet opcodes<span class="n" id="opn"></span></h2>
+  <p class="lead">The controller's known opcode table, each tested in up to four contexts: <b>alone</b>, <b>before a <code>9F</code> move</b>, <b>as a value+enable pair</b>, and as a full <b>job pattern</b> (value, enable, then the <code>9F</code> move). Tap a filter to narrow the list.</p>
+  <div class="counts" id="counts"></div>
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="grid"></div>
+</section>
+
+<section id="console">
+  <h2>Console verbs</h2>
+  <p class="lead">The pen-up/pen-down verbs are the HPGL way to fire a laser. On this firmware they are accepted but do nothing visible.</p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Verb</th><th>Args</th><th>Status</th><th>What it did</th></tr></thead>
+    <tbody id="ctab"></tbody>
+  </table></div>
+</section>
+
+<section id="avoid">
+  <h2>Commands that disturb the machine</h2>
+  <p class="lead">These each knocked the controller out of its working state — a hang, a dropped move, or the link going silent — and needed a power cycle. They stay on the matrix so we never send them by accident, and so a fix can be checked against them.</p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Opcode</th><th>Context</th><th>Effect</th></tr></thead>
+    <tbody id="avtab"></tbody>
+  </table></div>
+</section>
+
+<section id="left">
+  <h2>What's left, and the leading theory</h2>
+  <div class="two">
+    <div class="note"><b>Still to run:</b> the rest of the <code>alone</code> opcodes at other values, the untried <code>move</code> and <code>pair</code> contexts, writing the laser parameters (<code>4A–4F</code>, <code>DE</code>) then moving, and the opcodes outside the known table (~190 values, highest risk).</div>
+    <div class="note"><b>Leading theory:</b> when an enable-style opcode precedes a move, the controller <i>silently drops the move</i> instead of firing. That looks like the laser path is <b>gated behind a condition the machine won't meet</b> — most likely the Y axis never finished referencing. If so, the laser may stay dark until the Y card is fixed, and no command will override it.</div>
+  </div>
+</section>
+
+<footer class="wrap">Generated from the test logs in <code>fuzz_logs/</code>. LASE light monitored live by webcam during every trial. This page is a record of observed behaviour, not vendor documentation.</footer>
+</div>
+
+<script>
+const DATA = {
+  opcodes: [
+    ["C2","no-arg","ok","Sent alone: no state change. Harmless.","46 00 c2 86"],
+    ["C4","no-arg","ok","Sent alone and before a 9F move: moved normally.","46 00 c4 86"],
+    ["C6","no-arg","bad","Before a 9F move: next move refused (state byte 06), link went silent. Repeatable.","46 00 c6 1a da … 9f …"],
+    ["C8","no-arg","ok","Alone and before a 9F move: moved normally.","46 00 c8 86"],
+    ["B3","no-arg","bad","Before a 9F move: the move was silently dropped (hands clear, nothing moved).","46 00 b3 1a da … 9f …"],
+    ["B7","no-arg","bad","Before a 9F move: move silently dropped.","46 00 b7 1a da … 9f …"],
+    ["BB","no-arg","todo","Enable half of the B9/BB pair. Not yet tried before a move.","46 00 bb 86"],
+    ["BF","no-arg","todo","Enable half of the BD/BF pair. Not yet tried before a move.","46 00 bf 86"],
+    ["C3","no-arg","ok","Sent alone: no change. Before-move context not yet run.","46 00 c3 86"],
+    ["C7","no-arg","ok","Sent alone: no change. Before-move context not yet run.","46 00 c7 86"],
+    ["CB","no-arg","ok","Sent alone: no change.","46 00 cb 86"],
+    ["CD","no-arg","bad","Alone: canary failed, padding params changed, link silent.","46 00 cd 86"],
+    ["CF","no-arg","ok","Sent alone: no change.","46 00 cf 86"],
+    ["32","no-arg","ok","Sent alone: no change.","46 00 32 86"],
+    ["B1","be32","bad","Disturbed the machine in the first stacked test (Z counter jumped).","46 00 b1 00 00 00 25 86"],
+    ["B9","be32","ok","Sent alone: no change. Value=37.","46 00 b9 00 00 00 25 86"],
+    ["BD","be32","ok","Sent alone: no change.","46 00 bd 00 00 00 25 86"],
+    ["C1","be32","ok","Sent alone: no change.","46 00 c1 00 00 00 25 86"],
+    ["C5","be32","ok","Sent alone: no change.","46 00 c5 00 00 00 25 86"],
+    ["8A","be32","ok","Sent alone: no change.","46 00 8a 00 00 00 25 86"],
+    ["8C","be32","ok","Sent alone: no change (apparent Z move was a manual jog).","46 00 8c 00 00 00 25 86"],
+    ["8E","be32","ok","Sent alone: no change.","46 00 8e 00 00 00 25 86"],
+    ["90","be32","ok","Sent alone: no change.","46 00 90 00 00 00 25 86"],
+    ["B5","be16","ok","Alone and as B5+B7 pair: no light. Value=37 and value=1.","46 00 b5 00 25 86"],
+    ["80","be16","ok","Sent alone: no change.","46 00 80 00 25 86"],
+    ["AE","be16","todo","In the licence-adjacent range; sent alone only once. Treat with care.","46 00 ae 00 25 86"],
+    ["C9","byte","bad","Alone: machine stopped answering. Power cycle required.","46 00 c9 25 86"],
+    ["0A·1","chan","ok","Channel 1–3 alone: no change.","46 00 0a 01 86"],
+    ["0A·4","chan","bad","Channel 4: machine dropped out of ready.","46 00 0a 04 86"],
+    ["0C·1","chan","ok","Channels 1–4 alone: no change.","46 00 0c 01 86"],
+    ["A2","3×be32","ok","Sent alone: no change.","46 00 a2 00 00 00 25 … 86"],
+    ["44","1+be16","ok","Sent alone: no change.","46 00 44 01 00 25 86"],
+    ["16","1+be16","ok","Sent alone: no change.","46 00 16 01 00 25 86"],
+    ["B8","1+be16","ok","Sent alone: no change.","46 00 b8 01 00 25 86"],
+    ["9F","move","ok","The laser-flag move itself, at 3 speeds alone: moves, no light.","46 00 1a da … 9f … 86"]
+  ],
+  pairs: [
+    ["B5+B7","ok","Alone: harmless. As job pattern (value then move): move dropped."],
+    ["B9+BB","todo","Not yet run as a pair or job."],
+    ["BD+BF","todo","Not yet run as a pair or job."],
+    ["C1+C3","todo","Not yet run as a pair or job."],
+    ["C5+C7","todo","Not yet run as a pair or job."]
+  ],
+  console: [
+    ["PD","0","ok","Pen-down (HPGL laser-on). Accepted with 0 args, ran once. No light. PU sent after."],
+    ["PD + 9F","0","ok","PD then a 9F packet move then PU: all accepted, state stayed idle, no light."],
+    ["PU","5","ok","Pen-up. Accepted, no effect."],
+    ["GO","0 / 5","ok","Accepted silently, no motion from the console."],
+    ["ST","3","ok","Accepted, no visible effect."],
+    ["RS","4","ok","Accepted from not-ready state, no effect."],
+    ["GC","0/5/6","ok","Exists; no observed effect."],
+    ["PS","2 / 5+","todo","Vendor 'set parameter' file syntax. Not sent — unknown, possibly persistent."],
+    ["ID","1","todo","Setter of unknown effect. Not sent."]
+  ],
+  avoid: [
+    ["C9","alone","Machine stopped answering; power cycle required."],
+    ["CD","alone","Canary failed, padding parameters changed, link silent."],
+    ["B1","stacked","Z counter jumped from 120277 to 247035, moves stopped."],
+    ["C6","before 9F move","Next move refused — new state byte 06 — then link silent. Repeatable."],
+    ["B3","before 9F move","The following move silently dropped."],
+    ["B7","before 9F move","The following move silently dropped."],
+    ["0A ch4","alone","Machine dropped out of ready (GS 0→1)."]
+  ]
+};
+const CTX = {"no-arg":"no argument","be32":"32-bit value","be16":"16-bit value","byte":"8-bit value","chan":"channel byte","3×be32":"three 32-bit values","1+be16":"byte + 16-bit","move":"move opcode"};
+const STLABEL = {ok:"tried",bad:"disturb",todo:"to do",irr:"excluded"};
+let filter = "all";
+
+function counts(){
+  const c={ok:0,bad:0,todo:0};
+  DATA.opcodes.forEach(o=>c[o[2]]!==undefined&&c[o[2]]++);
+  const el=document.getElementById("counts");
+  el.innerHTML =
+    `<div class="stat"><b>${DATA.opcodes.length}</b><span>known opcodes</span></div>`+
+    `<div class="stat"><b style="color:var(--ok)">${c.ok}</b><span>harmless</span></div>`+
+    `<div class="stat"><b style="color:var(--bad)">${c.bad}</b><span>disturb</span></div>`+
+    `<div class="stat"><b style="color:var(--todo)">${c.todo}</b><span>to do</span></div>`+
+    `<div class="stat"><b style="color:var(--irr)">5</b><span>irreversible</span></div>`;
+  document.getElementById("opn").textContent = DATA.opcodes.length+" known";
+}
+function chips(){
+  const f=document.getElementById("filters");
+  [["all","All"],["ok","Harmless"],["bad","Disturbs"],["todo","To do"]].forEach(([k,lab])=>{
+    const b=document.createElement("button");b.textContent=lab;b.setAttribute("aria-pressed",k===filter);
+    b.onclick=()=>{filter=k;chips();grid();};f.appendChild(b);
+  });
+}
+function grid(){
+  const g=document.getElementById("grid");g.innerHTML="";
+  DATA.opcodes.filter(o=>filter==="all"||o[2]===filter).forEach(o=>{
+    const [op,ctx,st,desc,bytes]=o;
+    const d=document.createElement("div");d.className="cmd "+st;
+    d.innerHTML=`<div class="op">${op}<span class="st ${st}">${STLABEL[st]}</span></div>`+
+      `<div class="desc"><b style="color:var(--fg)">${CTX[ctx]||ctx}.</b> ${desc}</div>`+
+      `<div class="bytes">${bytes}</div>`;
+    g.appendChild(d);
+  });
+}
+function tables(){
+  document.getElementById("ctab").innerHTML = DATA.console.map(r=>
+    `<tr><td class="k">${r[0]}</td><td>${r[1]}</td><td><span class="pill st ${r[2]}">${STLABEL[r[2]]}</span></td><td>${r[3]}</td></tr>`).join("");
+  document.getElementById("avtab").innerHTML = DATA.avoid.map(r=>
+    `<tr><td class="k">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("");
+}
+counts();chips();grid();tables();
+
+const btn=document.getElementById("themeBtn");
+btn.onclick=()=>{
+  const r=document.documentElement;
+  const cur=r.getAttribute("data-theme")|| (matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");
+  r.setAttribute("data-theme",cur==="dark"?"light":"dark");
+};
+</script>
