@@ -76,3 +76,12 @@ Two separate problems were being conflated:
    output is dead.
 Even a software "force ready" would not fix problem 2. The decisive next steps for movement are hardware:
 the thermal-camera and motor-voltage comparison of the Y card against the X card (TODO 7d/7e).
+
+## 8. Full diagnostic-channel scan (2026-11-14)
+Every diagnostic id from 0x0000 to 0xFFFF was requested (read-only, 16 per packet). Result:
+- Only **ids 0 to 8** carry real data: ids 0-7 read [0, 0] and id 8 reads [counter, 1023] (the first number ticks up on
+  each read; the second is a constant 1023, the full-scale value of a 10-bit quantity, so it may be an analog reading
+  sitting at its maximum - unconfirmed).
+- Every other id returns padding: the second value is always 0xFFFFFFFF and the first is the id's low byte (plus 0x10000
+  for most of the range). There are no hidden regions of data in the diagnostic channel.
+So the diagnostic channel is fully mapped and is not a window onto the controller's memory or code.
