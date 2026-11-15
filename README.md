@@ -413,7 +413,31 @@ Wrapped in a packet together with the idle poll request (seq 0):
 ```
 After sending, keep polling (`10 2C 2E`) until the reported X/Y equal the target **and** state byte 0 is no longer `04`.
 
-**Scale:** X = **5 micrometres per step** (user-verified: 10000 = 50 mm, +X = right). Y is stored as 3.75 um per step but is unverified because that axis never moves. Positions are *counted steps*, open loop. They are not measured positions.
+**Coordinates are absolute, in steps.** The `9E` opcode is followed by two 32-bit big-endian numbers: the **first is X** (left-right, the head along the beam) and the **second is Y** (front-back, the whole beam). To move a given direction you set the target coordinate — the machine drives from wherever it is to that absolute position.
+
+```
+9E  <XXXXXXXX>  <YYYYYYYY>
+    │           └─ Y target = front-back position, in steps  (forward/back)
+    └───────────── X target = left-right position, in steps  (left/right)
+```
+
+**Left / right (X axis):**
+| To move… | Set X to… | Example `9E` bytes (Y held at 0) |
+|---|---|---|
+| **right** (increase X) | a larger number | `9E 00 00 07 D0 00 00 00 00` → X = 2000 (10 mm right of origin) |
+| **left** (decrease X) | a smaller number | `9E 00 00 03 E8 00 00 00 00` → X = 1000 (back toward the left) |
+| back to the left origin | `0` | `9E 00 00 00 00 00 00 00 00` → X = 0 |
+
+**Forward / back (Y axis):** same structure, but you change the **second** number and leave X. *(Y accepts these commands and the controller counts the steps, but the beam does not physically move yet — see the Y-card problem above.)*
+| To move… | Set Y to… | Example `9E` bytes (X held at 0) |
+|---|---|---|
+| **forward / toward the front** (increase Y) | a larger number | `9E 00 00 00 00 00 00 07 D0` → Y = 2000 |
+| **back / toward the rear** (decrease Y) | a smaller number | `9E 00 00 00 00 00 00 03 E8` → Y = 1000 |
+| back to the front origin | `0` | `9E 00 00 00 00 00 00 00 00` → Y = 0 |
+
+**Scale:** X = **5 micrometres per step** (user-verified: 10000 = 50 mm, +X = right). So 1 mm = 200 steps. Y is stored as 3.75 µm per step but is unverified because that axis never moves. Positions are *counted steps*, open loop — not measured positions, so a lost step is never corrected. A diagonal move (both X and Y non-zero in the same `9E`) travels to that corner in one go.
+
+In Python (see `tools/rayjet_sf.py`): `mv = lambda x, y, v: bytes([0x46,0,0x1A,0xDA]) + be32(v) + bytes([0x9E]) + be32(x) + be32(y) + bytes([0x86])` — then `rj.xfer(data=mv(2000, 0, 4000), ext=bytes([0x10,0x2C,0x2E]))` moves 10 mm right at 4000 steps/s.
 
 ### 7.2 Writing parameters (decoded; only `1A DA` tested)
 | Bytes | Meaning |
