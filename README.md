@@ -1,8 +1,10 @@
-# raybreak
+# raybreak — Trotec Rayjet 50 / Speedy2 reverse engineering
 
-**Open-source control of Trotec Rayjet laser engravers from Windows 11, with no original software.**
+**Open-source control of the Trotec Rayjet 50 CO₂ laser engraver from Windows 11, with no original software (no MiniManager, no JobControl).**
 We decoded the machine's serial protocol, and the head (left-right) and table (Z) already move on command from Python.
 **One mystery is left: the front-back beam axis never moves, and we need your eyes, hands and machines to solve it.**
+
+<sub>Covers: Trotec Rayjet 50 · Trotec Speedy2 controller · Synrad Firestar v30 (FSV30SAG) 30 W CO₂ laser · SM-NG stepper driver cards (Trinamic TMC249 + TI TMS320LF2407) · Infineon C167 CPU · FTDI USB-serial · running the engraver on Windows 11 after MiniManager/JobControl stopped working.</sub>
 
 <p align="center"><img src="images/00-rayjet-with-laptop.jpg" width="520" alt="A Trotec Rayjet 50 laser engraver connected by USB to a Windows 11 laptop"></p>
 <p align="center"><em>Our Rayjet 50, driven over USB from a Windows 11 laptop.</em></p>
@@ -519,3 +521,17 @@ Edit the COM port for your machine. The machine must report `GS;` = 0 first.
 4. Whether the newer-generation connect step (selecting engraver type, syncing FRAM settings) matters; this is only an inference.
 5. What `GF` masks, `GQ`, `GC` and the unused opcodes do.
 
+
+---
+
+## Searching for help with your Rayjet? You're in the right place
+
+This project exists because the Trotec Rayjet's original Windows software stopped working on modern Windows. If you searched for any of the following, read on and open an issue — we want your data:
+
+- **Trotec Rayjet 50 Windows 11** · Rayjet won't connect · Rayjet COM port · Rayjet USB driver · FTDI
+- **MiniManager won't start / blocked on Windows 11 / Windows 10** · JobControl · RayjetManager
+- **Trotec Speedy2 controller** · SM-NG card · Speedy2 CPU · reference switch · not referencing · axis won't move
+- **Synrad Firestar v30** · FSV30SAG · 30 W CO₂ laser module · Interface A / Interface B RJ45 pinout · PWM tickle
+- Rayjet serial protocol · control a laser engraver from Python · open-source laser controller · LightBurn alternative for Trotec
+
+We have the handshake, the packet protocol, the parameter table, the command reference, and a running log of what makes the machine move. If you own one of these machines, your firmware string and a compatibility report (`tools/rayjet_report.py`) help everyone.
