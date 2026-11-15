@@ -137,3 +137,24 @@ Correction: an earlier version of this note read the Z change as `B3` being a Z/
 the owner moving Z by hand (this happened in other tests too, so earlier "Z jumped" observations from stacked opcode tests
 may also have been manual). What stands is only that `B3` placed before a `9F` move was followed by a move that did not
 execute; this needs repeating without any hand movement before drawing a conclusion. Trials 9-16 remain untested.
+
+---
+
+## Enable-style commands before a move, repeated with hands clear, 2026-11-14 19:37-19:41 (LASE light never lit)
+| Block (head parked at X = 10 mm, ordinary `1A DA` speed, then `9F` move +10 mm) | Result |
+|---|---|
+| `C2`, `C4`, `C8` before the move | move executed normally |
+| `C6` before the move | move executed, next move refused (state 06), link silent |
+| `B3` before the move | **move not executed**; X and Z unchanged (Z never touched) |
+| `B7` before the move | **move not executed**; X and Z unchanged |
+| `B5 00 01` (value 1) + `B7` before the move | **move not executed**; X and Z unchanged |
+
+After each of these the next ordinary move worked normally, so the machine is not stuck; the move that follows the
+enable in the same block is silently dropped, with no error and no state change.
+
+Reading (INFERRED): `B3`, `B7` (and by pattern the other enable-style commands) request something the controller will
+not currently allow, and the controller drops the motion that depends on it rather than reporting an error. Setting the
+paired value first (`B5 = 1`) did not change that. One hypothesis: a laser-related request is refused while some other
+condition is not met (for example an axis that is not properly referenced or enabled, such as Y), so the laser path
+may be gated behind the Y problem. This is a hypothesis, not a finding.
+The remaining job-pattern pairs (`B9+BB`, `BD+BF`, `C1+C3`, `C5+C7`) and plain enables `BB`, `BF`, `C3`, `C7`, `CB`, `CF`, `32` were not run.
